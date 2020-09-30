@@ -1,6 +1,9 @@
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+import java.util.Stack;
 
 public class InfoGraph {
     private final int nodeCount;
@@ -19,74 +22,73 @@ public class InfoGraph {
         graph.get(to).add(new Pair<>(from, length));
     }
 
-    void breedSearch(int from, int to, int[] straightLengths) {
-        int currentNode = from;
+    ArrayList<Integer> breedSearch(int start, int end, int[] straightLengths) {
+        int currentNode = start;
         int wayLength = 0;
         ArrayList<Integer> wayPoints = new ArrayList<>();
         wayPoints.add(currentNode);
-        while (currentNode != to) {
+        while (currentNode != end) {
             int nextNode = -1;
-            int currentLength = straightLengths[currentNode];
-            int nextLength = currentLength;
+            int nextLength = Integer.MAX_VALUE;
             int nextWayLength = 0;
             for (Pair<Integer, Integer> way : graph.get(currentNode)) {
-                if (currentLength - way.getValue() < nextLength) {
-                    nextLength = currentLength - way.getValue();
-                    nextNode = way.getKey();
+                int node = way.getKey();
+                if (straightLengths[node] < nextLength) {
+                    nextLength = straightLengths[node];
+                    nextNode = node;
                     nextWayLength = way.getValue();
                 }
             }
             wayLength += nextWayLength;
             System.out.println("Next node: " + nextNode);
-            System.out.println("Next length: " + nextLength);
-            System.out.println("Way length: " + wayLength);
             currentNode = nextNode;
             wayPoints.add(currentNode);
         }
-        System.out.println("Full length: " + wayLength);
-        System.out.println("Straight length: " + straightLengths[from]);
-        System.out.println("Way:");
-        for (int node : wayPoints) System.out.print(node + " ");
+        System.out.println("Way length: " + wayLength);
+        System.out.println("Straight length from start: " + straightLengths[start]);
+        System.out.println();
+        return wayPoints;
     }
 
-    void aStar(int start, int end, int[] straightLengths) {
+    Stack<Integer> aStar(int start, int end, int[] straightLengths) {
         int[] costsFromStart = new int[nodeCount];
+        int[] fullCost = new int[nodeCount];
         boolean[] visited = new boolean[nodeCount];
-        ArrayList<Integer> way = new ArrayList<>();
-        way.add(start);
+        int[] prevNode = new int[nodeCount];
         for (int i = 0; i < nodeCount; i++) {
             costsFromStart[i] = Integer.MAX_VALUE;
+            fullCost[i] = Integer.MAX_VALUE;
         }
         costsFromStart[start] = 0;
         int currentNode = start;
+        PriorityQueue<Pair<Integer, Integer>> queue = new PriorityQueue<>(Comparator.comparing(Pair::getValue));
         while (currentNode != end) {
             visited[currentNode] = true;
-            int nextNode = currentNode;
-            int minLength = Integer.MAX_VALUE;
             for (Pair<Integer, Integer> nodePair : graph.get(currentNode)) {
                 int node = nodePair.getKey();
                 if (visited[node]) continue;
                 int length = nodePair.getValue();
-                if (costsFromStart[node] > costsFromStart[currentNode] + length)
+                if (costsFromStart[node] > costsFromStart[currentNode] + length) {
                     costsFromStart[node] = costsFromStart[currentNode] + length;
-                if (costsFromStart[node] + straightLengths[node] < minLength) {
-                    minLength = costsFromStart[node] + straightLengths[node];
-                    nextNode = node;
+                    prevNode[node] = currentNode;
+                    queue.remove(new Pair<>(node, fullCost[node]));
+                    fullCost[node] = costsFromStart[node] + straightLengths[node];
+                    queue.offer(new Pair<>(node, fullCost[node]));
                 }
             }
-            currentNode = nextNode;
-            way.add(nextNode);
-            System.out.println();
-            System.out.println("Next node = " + currentNode);
-            System.out.println("Min cost = " + minLength);
-            System.out.println("Costs from start");
-            for (int node : costsFromStart) System.out.print(node + " ");
+            currentNode = queue.poll().getKey();
+            System.out.println("Next node: " + currentNode);
         }
+        Stack<Integer> way = new Stack<>();
+        currentNode = end;
+        while (currentNode != start) {
+            way.push(currentNode);
+            currentNode = prevNode[currentNode];
+        }
+        way.add(start);
+        System.out.println("Way cost = " + costsFromStart[end]);
         System.out.println();
-        System.out.println("Full cost = " + costsFromStart[end]);
-        System.out.println("Way:");
-        for (int node : way) System.out.print(node + " ");
-        System.out.println();
+        return way;
     }
 
     public static void main(String[] args) {

@@ -19,7 +19,7 @@ class Graph {
         graph.get(to).add(from);
     }
 
-    void findWay(int from, int to, int[] prev) {
+    private Stack<Integer> findWay(int from, int to, int[] prev) {
         Stack<Integer> way = new Stack<>();
         way.push(to);
         int cur = prev[to];
@@ -28,23 +28,18 @@ class Graph {
             cur = prev[cur];
         }
         way.push(from);
-        System.out.println("Way: ");
-        while (!way.empty()) {
-            System.out.print(way.pop() + " ");
-        }
-        System.out.println();
+        return way;
     }
 
-    void dfs(int start, int end) {
+    Stack<Integer> dfs(int start, int end) {
         boolean[] visited = new boolean[vertices];
         int[] prev = new int[vertices];
         prev[start] = start;
-        System.out.println("DFS from " + start + ": ");
         dfs(start, visited, prev);
-        findWay(start, end, prev);
+        return findWay(start, end, prev);
     }
 
-    void dfs(int start, boolean[] visited, int[] prev) {
+    private void dfs(int start, boolean[] visited, int[] prev) {
         visited[start] = true;
         for (int vertex : graph.get(start)) {
             if (!visited[vertex]) {
@@ -54,20 +49,17 @@ class Graph {
         }
     }
 
-    boolean limitedDfs(int start, int end, int limit) {
+    Stack<Integer> limitedDfs(int start, int end, int limit) {
         boolean[] visited = new boolean[vertices];
         int[] prev = new int[vertices];
         prev[start] = start;
         int depth = 0;
-        System.out.println("DFS from " + start + " with limit = " + limit + ": ");
         limitedDfs(start, visited, prev, depth, limit);
-        if (visited[end]) {
-            findWay(start, end, prev);
-        } else System.out.println("No way with limit = " + limit);
-        return visited[end];
+        if (visited[end]) return findWay(start, end, prev);
+        return new Stack<>();
     }
 
-    void limitedDfs(int start, boolean[] visited, int[] prev, int depth, int limit) {
+    private void limitedDfs(int start, boolean[] visited, int[] prev, int depth, int limit) {
         if (depth > limit) return;
         visited[start] = true;
         for (int vertex : graph.get(start)) {
@@ -78,19 +70,18 @@ class Graph {
         }
     }
 
-    void iterativeDfs(int start, int end) {
+    Stack<Integer> iterativeDfs(int start, int end) {
         int limit = 1;
-        System.out.println("Iterative DFS from " + start + ":");
-        while (!limitedDfs(start, end, limit)) limit++;
+        while (limitedDfs(start, end, limit).empty()) limit++;
+        return limitedDfs(start, end, limit);
     }
 
-    void bfs(int start, int end) {
+    Stack<Integer> bfs(int start, int end) {
         LinkedList<Integer> queue = new LinkedList<>();
         boolean[] used = new boolean[vertices];
         int[] prev = new int[vertices];
         prev[start] = start;
         queue.add(start);
-        System.out.println("BFS from " + start + ":");
         while (!queue.isEmpty()) {
             int first = queue.removeFirst();
             for (int node : graph.get(first)) {
@@ -101,32 +92,28 @@ class Graph {
                 }
             }
         }
-        findWay(start, end, prev);
+        return findWay(start, end, prev);
     }
 
-    void findBidirectionalWay(int start, int end, int[] prev, int[] prevEnd, int intersect) {
+    private LinkedList<Integer> findBidirectionalWay(int start, int end, int[] prev, int[] prevEnd, int intersect) {
         LinkedList<Integer> way = new LinkedList<>();
         way.add(intersect);
         int cur = prev[intersect];
         while (cur != start) {
-            way.add(cur);
+            way.push(cur);
             cur = prev[cur];
         }
-        way.add(start);
+        way.push(start);
         cur = prevEnd[intersect];
         while (cur != end) {
-            way.push(cur);
+            way.add(cur);
             cur = prevEnd[cur];
         }
-        way.push(end);
-        System.out.println("Way: ");
-        while (!way.isEmpty()) {
-            System.out.print(way.removeLast() + " ");
-        }
-        System.out.println();
+        way.add(end);
+        return way;
     }
 
-    void bidirectionalBfs(int start, int end) {
+    LinkedList<Integer> bidirectionalBfs(int start, int end) {
         int intersect = -1;
         LinkedList<Integer> queue = new LinkedList<>();
         boolean[] used = new boolean[vertices];
@@ -138,7 +125,6 @@ class Graph {
         int[] prevEnd = new int[vertices];
         prevEnd[end] = -1;
         queueEnd.add(end);
-        System.out.println("BFS from " + start + " and " + end + ":");
         while (!queue.isEmpty() && !queueEnd.isEmpty() && intersect == -1) {
             int first = queue.removeFirst();
             for (int node : graph.get(first)) {
@@ -163,8 +149,7 @@ class Graph {
                 }
             }
         }
-        System.out.println("Intersect: " + intersect);
-        findBidirectionalWay(start, end, prev, prevEnd, intersect);
+        return findBidirectionalWay(start, end, prev, prevEnd, intersect);
     }
 
     public static void main(String[] args) {
