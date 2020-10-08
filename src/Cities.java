@@ -11,7 +11,6 @@ public class Cities {
     private final int[] wayLengthsToZhitomir = new int[CITIES_COUNT];
 
     Cities() {
-        System.out.println("Add cities list");
         try {
             Scanner scanner = new Scanner(new File("C:\\Users\\Anna.Kozhemyako\\Desktop\\mine\\labs_code\\ii_lab\\src\\cities.txt"));
             while (scanner.hasNextLine()) {
@@ -26,9 +25,8 @@ public class Cities {
             e.printStackTrace();
         }
 
-        System.out.println("Add cities graphs");
         graph = new Graph(cities.size());
-        infoGraph = new InfoGraph(cities.size());
+        infoGraph = new InfoGraph(cities.size(), cities);
         try {
             Scanner scanner = new Scanner(new File("C:\\Users\\Anna.Kozhemyako\\Desktop\\mine\\labs_code\\ii_lab\\src\\graph.txt"));
             while (scanner.hasNextLine()) {
@@ -39,7 +37,6 @@ public class Cities {
                 int index2 = citiesToIndex.get(city2);
                 graph.addEdge(index1, index2);
                 infoGraph.addEdge(index1, index2, wayLength);
-//                System.out.println(city1 + " (" + index1 + ") " + city2 + " (" + index2 + ") " + wayLength);
             }
             scanner.close();
         } catch (FileNotFoundException e) {
@@ -54,26 +51,26 @@ public class Cities {
         System.out.println("DFS");
         printWay(dfsWay);
         Stack<Integer> limitedDfsWay = graph.limitedDfs(indexFrom, indexTo, 3);
-        System.out.println("DFS with limit = 3");
+        System.out.println("\nDFS with limit = 3");
         printWay(limitedDfsWay);
         Stack<Integer> iterativeDfsWay = graph.iterativeDfs(indexFrom, indexTo);
-        System.out.println("Iterative DFS");
+        System.out.println("\nIterative DFS");
         printWay(iterativeDfsWay);
         Stack<Integer> bfsWay = graph.bfs(indexFrom, indexTo);
-        System.out.println("BFS");
+        System.out.println("\nBFS");
         printWay(bfsWay);
         LinkedList<Integer> biBfs = graph.bidirectionalBfs(indexFrom, indexTo);
-        System.out.println("Bidirectional BFS");
+        System.out.println("\nBidirectional BFS");
         printWay(biBfs);
     }
 
     public void findWayToZhitomir(String from) {
         int indexFrom = citiesToIndex.get(from);
         int indexZhitomir = citiesToIndex.get("Житомир");
-        System.out.println("Breed search");
+        System.out.println("\nBreed search");
         ArrayList<Integer> breed = infoGraph.breedSearch(indexFrom, indexZhitomir, wayLengthsToZhitomir);
         printWay(breed);
-        System.out.println("A Star");
+        System.out.println("\nA Star");
         Stack<Integer> aStar = infoGraph.aStar(indexFrom, indexZhitomir, wayLengthsToZhitomir);
         printWay(aStar);
     }
@@ -83,9 +80,9 @@ public class Cities {
             System.out.println("No way");
             return;
         }
-        System.out.println("Way: ");
         while (!way.empty()) {
-            System.out.print(cities.get(way.pop()) + " -> ");
+            int city = way.pop();
+            System.out.print(cities.get(city) + " (" + city + ") -> ");
         }
         System.out.println();
     }
@@ -95,9 +92,8 @@ public class Cities {
             System.out.println("No way\n");
             return;
         }
-        System.out.println("Way: ");
         for (int node : way)
-            System.out.print(cities.get(node) + " -> ");
+            System.out.print(cities.get(node) + "(" + node + ") -> ");
         System.out.println();
     }
 

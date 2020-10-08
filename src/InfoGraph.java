@@ -8,9 +8,11 @@ import java.util.Stack;
 public class InfoGraph {
     private final int nodeCount;
     private final ArrayList<ArrayList<Pair<Integer, Integer>>> graph;
+    private final ArrayList<String> cities;
 
-    InfoGraph(int nodeCount) {
+    InfoGraph(int nodeCount, ArrayList<String> cities) {
         this.nodeCount = nodeCount;
+        this.cities = cities;
         graph = new ArrayList<>(nodeCount);
         for (int i = 0; i < nodeCount; i++) {
             graph.add(new ArrayList<>());
@@ -40,7 +42,6 @@ public class InfoGraph {
                 }
             }
             wayLength += nextWayLength;
-            System.out.println("Next node: " + nextNode);
             currentNode = nextNode;
             wayPoints.add(currentNode);
         }
@@ -77,7 +78,6 @@ public class InfoGraph {
                 }
             }
             currentNode = queue.poll().getKey();
-            System.out.println("Next node: " + currentNode);
         }
         Stack<Integer> way = new Stack<>();
         currentNode = end;
@@ -86,13 +86,13 @@ public class InfoGraph {
             currentNode = prevNode[currentNode];
         }
         way.add(start);
-        System.out.println("Way cost = " + costsFromStart[end]);
+        System.out.println("Way length = " + costsFromStart[end]);
         System.out.println();
         return way;
     }
 
     public static void main(String[] args) {
-        InfoGraph graph = new InfoGraph(6);
+        /*InfoGraph graph = new InfoGraph(6);
 
         graph.addEdge(0, 1, 7);
         graph.addEdge(0, 2, 10);
@@ -105,6 +105,6 @@ public class InfoGraph {
         graph.addEdge(4, 5, 16);
 
         graph.aStar(0, 3, new int[]{20, 14, 8, 0, 6, 5});
-//        graph.breedSearch(0, 3, new int[]{20, 14, 8, 0, 6, 5});
+        graph.breedSearch(0, 3, new int[]{20, 14, 8, 0, 6, 5});*/
     }
 }
